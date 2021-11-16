@@ -46,7 +46,11 @@ try:
             except ffmpeg._run.Error:
                 print('No such file! %s' % 'IMG_%s.MOV' % res.group(1))
         elif res_m:
-            print(res_m)
+            print(res_m.group(0))
+            print(res_m.group(1))
+            print(res_m.group(2))
+            print(res_m.group(3))
+            print(res_m.group(4))
 except FileNotFoundError:
     print('Need the "dev.lst" file with videos descriptions!')
 
