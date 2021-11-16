@@ -40,9 +40,7 @@ try:
             end = res.group(2).split('-')[1]
             try:
                 if not os.path.is_file('%sIMG_%s_cut_%s_%s.MOV' % (work_dir, file_number, start, end)):
-                    ffmpeg.input(filename)
-                    .filter('trim', start=start, end=end)
-                    .output('%sIMG_%s_cut_%s_%s.mov' % (work_dir, file_number, start, end)).run()
+                    ffmpeg.input(filename).filter('trim', start=start, end=end).output('%sIMG_%s_cut_%s_%s.mov' % (work_dir, file_number, start, end)).run()
             except ffmpeg._run.Error:
                 print('No such file! %s' % 'IMG_%s.MOV' % res.group(1))
         elif res_m:
