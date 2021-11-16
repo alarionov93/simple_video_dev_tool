@@ -1,4 +1,4 @@
-import re, sys
+import re, os, sys
 import glob
 import ffmpeg
 
@@ -12,10 +12,20 @@ dev.lst file formatting:
 
 '''
 
+class NoTrailingSlash(Exception):
+    def __init__(self, message, errors):
+        self.message = message
+        self.errors = errors
+
 try:
     work_dir = sys.argv[1]
+    if work_dir[-1] != '/':
+        raise NoTrailingSlashError('[ERROR] No slash in path!')
 except IndexError:
     print('Need to pass working directory!')
+except NoTrailingSlashError:
+    print('Error with path!')
+
 
 vids_one_fragment_re = r'^- \[ \] (\d{4}) (\d{1,2}-\d{2})$'
 vids_multiple_re = r'^- \[ \] (\d{4})(\s\d{1,4}-\d{1,4};)+'
@@ -25,13 +35,14 @@ try:
         res_m = re.search(vids_multiple_re, l)
         if res:
             file_number = res.group(1)
+            filename = '%sIMG_%s.MOV' % (work_dir, file_number)
             start = res.group(2).split('-')[0]
             end = res.group(2).split('-')[1]
             try:
-                # ffmpeg.input('IMG_%s.MOV' % file_number)
-                # .filter('trim', start=start, end=end)
-                # .output('IMG_%s_cut_%s_%s.mov' % (res.group(1), start, end)).run()
-                print(file_number)
+                if !os.path.is_file('%sIMG_%s_cut_%s_%s.MOV' % (work_dir, file_number, start, end)):
+                ffmpeg.input(filename)
+                .filter('trim', start=start, end=end)
+                .output('IMG_%s_cut_%s_%s.mov' % (file_number, start, end)).run()
             except ffmpeg._run.Error:
                 print('No such file! %s' % 'IMG_%s.MOV' % res.group(1))
         elif res_m:
