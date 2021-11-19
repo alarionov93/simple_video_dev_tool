@@ -1,8 +1,10 @@
 import re, os, sys, glob
-# import ffmpeg
-
 from threading import Thread
-
+try:
+    import ffmpeg
+except ModuleNotFoundError:
+    print('[FATAL ERROR] No ffmpeg or ffmpeg-python installed!\n \tTo fix this -> run `sudo apt install ffmpeg`,\n \tand then `pip3 install ffmpeg-python`.')
+    exit(-1)
 '''
 
 dev.lst file formatting:
@@ -38,6 +40,7 @@ try:
     vids_one_fragment_re = r'^- \[ \] (\d{4}) (\d{1,2}-\d{2})$'
     vids_multiple_re = r'^- \[ \] (\d{4})(( \d{1,4}-\d{1,4};)+)$'
     try:
+        l_cnt = 0
         for l in open('%sdev.lst' % work_dir, 'r').readlines():
             res = re.search(vids_one_fragment_re, l)
             res_m = re.findall(vids_multiple_re, l)
@@ -55,10 +58,13 @@ try:
                         (start, end) = (t.split('-')[0], t.split('-')[1])
                         th = Thread(target=cut_fragment, args=(work_dir, file_number, start, end))
                         th.start()
+            else:
+                print('[INFO] Maybe problem with format, check line %s of "dev.lst". \n See README.md for formatting info.' % (l_cnt+1), file=sys.stderr)
+            l_cnt += 1
     except FileNotFoundError:
-        print('[ERROR] Need the "dev.lst" file with videos descriptions right in the work_dir!', file=sys.stderr)
+        print('[FATAL ERROR] Need the "dev.lst" file with videos descriptions right in the work_dir!', file=sys.stderr)
 except IndexError:
-    print('[ERROR] Need to pass working directory!', file=sys.stderr)
+    print('[FATAL ERROR] Need to pass working directory!', file=sys.stderr)
 except NoTrailingSlashError as e:
-    print('[ERROR] %s' % e, file=sys.stderr)
+    print('[FATAL ERROR] %s' % e, file=sys.stderr)
 
