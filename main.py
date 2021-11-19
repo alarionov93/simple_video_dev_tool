@@ -57,9 +57,10 @@ try:
                     times = [x.strip() for x in r[1].split(';') if len(x) > 0]
                     for t in times:
                         (start, end) = (t.split('-')[0], t.split('-')[1])
-                        th = Thread(target=cut_fragment, args=(work_dir, file_number, start, end))
-                        th.start()
-                        ffmpeg_threads += [th]
+                        cut_fragment(work_dir, file_number, start, end)
+                        # th = Thread(target=cut_fragment, args=(work_dir, file_number, start, end))
+                        # th.start()
+                        # ffmpeg_threads += [th]
             else:
                 print('[INFO] Maybe problem with format, check line %s of "dev.lst". \n See README.md for formatting info.' % (l_cnt+1), file=sys.stderr)
             l_cnt += 1
@@ -70,7 +71,7 @@ except IndexError:
 except NoTrailingSlashError as e:
     print('[FATAL ERROR] %s' % e, file=sys.stderr)
 
-for th in ffmpeg_threads:
-    print('Working...')
-    sleep(1)
-    th.join()
+# for th in ffmpeg_threads:
+    # print('Working...')
+    # sleep(1)
+    # th.join()
