@@ -21,25 +21,25 @@ class NoTrailingSlashError(Exception):
 def cut_fragment(work_dir, file_number, start, end):
     try:
         res_f = '%sIMG_%s_cut_%s_%s.MOV' % (work_dir, file_number, start, end)
-        raise ffmpeg._run.Error('Info about error here.', stdout=sys.stdout, stderr=sys.stderr)
+        # raise ffmpeg._run.Error('Info about error here.', stdout=sys.stdout, stderr=sys.stderr)
         if not os.path.isfile(res_f):
-            print('Cut video %s' % res_f)
-            # ffmpeg.input(filename).filter('trim', start=start, end=end).output(res_f).run()
+            print('Cut video %s' % res_f, file=sys.stdout)
+            ffmpeg.input(filename).filter('trim', start=start, end=end).output(res_f).run()
         else:
-            print('File %s exists!' % res_f)
+            print('File %s exists!' % res_f, file=sys.stdout)
     except ffmpeg._run.Error as e:
-        print('[ERROR] IMG_%s.MOV, exception was:' % file_number, e)
+        print('[ERROR] IMG_%s.MOV, exception was:' % (file_number, e), file=sys.stderr)
 
     return file_number
 
 try:
     work_dir = sys.argv[1]
     if work_dir[-1] != '/':
-        raise NoTrailingSlashError('[ERROR] No slash in path!')
+        raise NoTrailingSlashError('No slash in path!')
 except IndexError:
-    print('Need to pass working directory!')
-except NoTrailingSlashError:
-    print('[ERROR] Error with path no slash!')
+    print('Need to pass working directory!', file=sys.stderr)
+except NoTrailingSlashError as e:
+    print('[ERROR] %s' % e, file=sys.stderr)
 
 
 vids_one_fragment_re = r'^- \[ \] (\d{4}) (\d{1,2}-\d{2})$'
@@ -58,14 +58,11 @@ try:
             for r in res_m:
                 file_number = r[0]
                 times = [x.strip() for x in r[1].split(';') if len(x) > 0]
-                # print(file_number, times)
-                # filename = '%sIMG_%s.MOV' % (work_dir, file_number)
-                # infile = ffmpeg.input(filename)
                 for t in times:
                     (start, end) = (t.split('-')[0], t.split('-')[1])
                     th = Thread(target=cut_fragment, args=(work_dir, file_number, start, end))
                     th.start()
 
 except FileNotFoundError:
-    print('Need the "dev.lst" file with videos descriptions!')
+    print('Need the "dev.lst" file with videos descriptions!', file=sys.stderr)
 
