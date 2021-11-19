@@ -21,7 +21,7 @@ class NoTrailingSlashError(Exception):
 def cut_fragment(work_dir, file_number, start, end):
     try:
         res_f = '%sIMG_%s_cut_%s_%s.MOV' % (work_dir, file_number, start, end)
-        raise ffmpeg._run.Error('Info about error here.')
+        raise ffmpeg._run.Error('Info about error here.', stdout=sys.stdout, stderr=sys.stderr)
         if not os.path.isfile(res_f):
             print('Cut video %s' % res_f)
             # ffmpeg.input(filename).filter('trim', start=start, end=end).output(res_f).run()
