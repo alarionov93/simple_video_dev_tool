@@ -1,5 +1,5 @@
 import re, os, sys, glob
-import ffmpeg
+# import ffmpeg
 
 from threading import Thread
 
@@ -35,33 +35,30 @@ try:
     work_dir = sys.argv[1]
     if work_dir[-1] != '/':
         raise NoTrailingSlashError('No slash in path!')
+    vids_one_fragment_re = r'^- \[ \] (\d{4}) (\d{1,2}-\d{2})$'
+    vids_multiple_re = r'^- \[ \] (\d{4})(( \d{1,4}-\d{1,4};)+)$'
+    try:
+        for l in open('%sdev.lst' % work_dir, 'r').readlines():
+            res = re.search(vids_one_fragment_re, l)
+            res_m = re.findall(vids_multiple_re, l)
+            if res:
+                file_number = res.group(1)
+                filename = '%sIMG_%s.MOV' % (work_dir, file_number)
+                start = res.group(2).split('-')[0]
+                end = res.group(2).split('-')[1]
+                cut_fragment(work_dir, file_number, start, end)
+            elif res_m:
+                for r in res_m:
+                    file_number = r[0]
+                    times = [x.strip() for x in r[1].split(';') if len(x) > 0]
+                    for t in times:
+                        (start, end) = (t.split('-')[0], t.split('-')[1])
+                        th = Thread(target=cut_fragment, args=(work_dir, file_number, start, end))
+                        th.start()
+    except FileNotFoundError:
+        print('[ERROR] Need the "dev.lst" file with videos descriptions right in the work_dir!', file=sys.stderr)
 except IndexError:
-    print('Need to pass working directory!', file=sys.stderr)
+    print('[ERROR] Need to pass working directory!', file=sys.stderr)
 except NoTrailingSlashError as e:
     print('[ERROR] %s' % e, file=sys.stderr)
-
-
-vids_one_fragment_re = r'^- \[ \] (\d{4}) (\d{1,2}-\d{2})$'
-vids_multiple_re = r'^- \[ \] (\d{4})(( \d{1,4}-\d{1,4};)+)$'
-try:
-    for l in open('%sdev.lst' % work_dir, 'r').readlines():
-        res = re.search(vids_one_fragment_re, l)
-        res_m = re.findall(vids_multiple_re, l)
-        if res:
-            file_number = res.group(1)
-            filename = '%sIMG_%s.MOV' % (work_dir, file_number)
-            start = res.group(2).split('-')[0]
-            end = res.group(2).split('-')[1]
-            cut_fragment(work_dir, file_number, start, end)
-        elif res_m:
-            for r in res_m:
-                file_number = r[0]
-                times = [x.strip() for x in r[1].split(';') if len(x) > 0]
-                for t in times:
-                    (start, end) = (t.split('-')[0], t.split('-')[1])
-                    th = Thread(target=cut_fragment, args=(work_dir, file_number, start, end))
-                    th.start()
-
-except FileNotFoundError:
-    print('Need the "dev.lst" file with videos descriptions right in the work_dir!', file=sys.stderr)
 
