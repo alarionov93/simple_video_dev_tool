@@ -15,6 +15,7 @@ dev.lst file formatting:
 
 '''
 
+ffmpeg_threads = []
 class NoTrailingSlashError(Exception):
     def __init__(self, message):
         self.message = message
@@ -58,6 +59,7 @@ try:
                         (start, end) = (t.split('-')[0], t.split('-')[1])
                         th = Thread(target=cut_fragment, args=(work_dir, file_number, start, end))
                         th.start()
+                        ffmpeg_threads += [th]
             else:
                 print('[INFO] Maybe problem with format, check line %s of "dev.lst". \n See README.md for formatting info.' % (l_cnt+1), file=sys.stderr)
             l_cnt += 1
@@ -68,3 +70,7 @@ except IndexError:
 except NoTrailingSlashError as e:
     print('[FATAL ERROR] %s' % e, file=sys.stderr)
 
+for th in ffmpeg_threads:
+    print('Working...')
+    sleep(1)
+    th.join()
