@@ -1,5 +1,5 @@
 import re, os, sys, glob
-# import ffmpeg
+import ffmpeg
 
 from threading import Thread
 
@@ -21,13 +21,14 @@ class NoTrailingSlashError(Exception):
 def cut_fragment(work_dir, file_number, start, end):
     try:
         res_f = '%sIMG_%s_cut_%s_%s.MOV' % (work_dir, file_number, start, end)
+        raise ffmpeg._run.Error('Info about error here.')
         if not os.path.isfile(res_f):
-            print('Cut video %s' % file_number)
-            ffmpeg.input(filename).filter('trim', start=start, end=end).output('%sIMG_%s_cut_%s_%s.mov' % (work_dir, file_number, start, end)).run()
+            print('Cut video %s' % res_f)
+            # ffmpeg.input(filename).filter('trim', start=start, end=end).output(res_f).run()
         else:
-            print('File %s exists!' % file_number)
-    except ffmpeg._run.Error:
-        print('No such file! %s' % 'IMG_%s.MOV' % file_number)
+            print('File %s exists!' % res_f)
+    except ffmpeg._run.Error as e:
+        print('[ERROR] IMG_%s.MOV, exception was:' % file_number, e)
 
     return file_number
 
@@ -38,7 +39,7 @@ try:
 except IndexError:
     print('Need to pass working directory!')
 except NoTrailingSlashError:
-    print('Error with path!')
+    print('[ERROR] Error with path no slash!')
 
 
 vids_one_fragment_re = r'^- \[ \] (\d{4}) (\d{1,2}-\d{2})$'
@@ -57,12 +58,14 @@ try:
             for r in res_m:
                 file_number = r[0]
                 times = [x.strip() for x in r[1].split(';') if len(x) > 0]
-                print(file_number, times)
-                filename = '%sIMG_%s.MOV' % (work_dir, file_number)
+                # print(file_number, times)
+                # filename = '%sIMG_%s.MOV' % (work_dir, file_number)
                 # infile = ffmpeg.input(filename)
                 for t in times:
                     (start, end) = (t.split('-')[0], t.split('-')[1])
                     th = Thread(target=cut_fragment, args=(work_dir, file_number, start, end))
+                    th.start()
+
 except FileNotFoundError:
     print('Need the "dev.lst" file with videos descriptions!')
 
