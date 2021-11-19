@@ -19,3 +19,6 @@ sudo apt install ffmpeg
 
 #### Requirements:
 `requirements.txt` file, and ffmpeg on your system.
+
+
+`ffmpeg -i IMG_0907.MOV -filter_complex [0]trim=end=112:start=109[s0] -map [s0] test109112.mov`
