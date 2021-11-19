@@ -14,9 +14,8 @@ dev.lst file formatting:
 '''
 
 class NoTrailingSlashError(Exception):
-    def __init__(self, message, errors):
+    def __init__(self, message):
         self.message = message
-        self.errors = errors
 
 def cut_fragment(work_dir, file_number, start, end):
     try:
@@ -28,7 +27,7 @@ def cut_fragment(work_dir, file_number, start, end):
         else:
             print('File %s exists!' % res_f, file=sys.stdout)
     except ffmpeg._run.Error as e:
-        print('[ERROR] IMG_%s.MOV, exception was:' % (file_number, e), file=sys.stderr)
+        print('[ERROR] IMG_%s.MOV, ffmpeg exception was: %s' % (file_number, e), file=sys.stderr)
 
     return file_number
 
@@ -64,5 +63,5 @@ try:
                     th.start()
 
 except FileNotFoundError:
-    print('Need the "dev.lst" file with videos descriptions!', file=sys.stderr)
+    print('Need the "dev.lst" file with videos descriptions right in the work_dir!', file=sys.stderr)
 
